@@ -1,46 +1,86 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
+import { userService } from '../container';
+import {
+  esRolUsuario,
+  ICreateUserDTO,
+  IUpdateUserDTO,
+  IUpdateUserActiveDTO,
+  UserRole
+} from '../dtos/user.dto';
+import { aBooleanoQuery, paginaLimiteDeQuery } from '../middlewares/validation';
 
 export class UserController {
-  public static getAllUsers = (req: Request, res: Response): void => {
-    // TODO: llamar al servicio y responder con el listado completo de usuarios.
-    res.status(501).json({
-      success: false,
-      message: 'El listado de usuarios todavía no está implementado.'
-    });
+  public static createUser = async (
+    req: Request<Record<string, string>, unknown, ICreateUserDTO>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const usuario = await userService.createUser(req.body);
+      res.status(201).json({ success: true, data: usuario });
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public static createUser = (req: Request, res: Response): void => {
-    // TODO: llamar al servicio con req.body (perfil: estudiante, docente o administrador) y responder 201.
-    res.status(501).json({
-      success: false,
-      message: 'El registro de usuarios todavía no está implementado.'
-    });
+  public static getAllUsers = async (
+    req: Request,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const query = req.query as Record<string, unknown>;
+      const paginacion = paginaLimiteDeQuery(query) ?? {};
+      const rol: UserRole | undefined = esRolUsuario(query.rol) ? query.rol : undefined;
+      const activo =
+        query.activo === 'true' || query.activo === 'false'
+          ? aBooleanoQuery(query.activo)
+          : undefined;
+
+      const resultado = await userService.getUsers({ ...paginacion, rol, activo });
+      res.setHeader('X-Total-Count', String(resultado.total));
+      res.status(200).json({ success: true, data: resultado.items });
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public static getUserById = (req: Request, res: Response): void => {
-    const { id } = req.params;
-    // TODO: pasar id a la operación de consulta y responder con el usuario encontrado.
-    res.status(501).json({
-      success: false,
-      message: `La consulta del usuario ${id} todavía no está implementada.`
-    });
+  public static getUserById = async (
+    req: Request<{ id: string }>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const usuario = await userService.getUserDetail(req.params.id);
+      res.status(200).json({ success: true, data: usuario });
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public static updateUser = (req: Request, res: Response): void => {
-    const { id } = req.params;
-    // TODO: pasar id y req.body (parcial: rol, estado de cuenta o contraseña) a la actualización.
-    res.status(501).json({
-      success: false,
-      message: `La actualización del usuario ${id} todavía no está implementada.`
-    });
+  public static updateUser = async (
+    req: Request<{ id: string }, unknown, IUpdateUserDTO>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const usuario = await userService.updateUser(req.params.id, req.body);
+      res.status(200).json({ success: true, data: usuario });
+    } catch (error) {
+      next(error);
+    }
   };
 
-  public static deleteUser = (req: Request, res: Response): void => {
-    const { id } = req.params;
-    // TODO: realizar el borrado lógico (marcar la cuenta como inactiva) del usuario.
-    res.status(501).json({
-      success: false,
-      message: `La eliminación lógica del usuario ${id} todavía no está implementada.`
-    });
+  public static setUserActive = async (
+    req: Request<{ id: string }, unknown, IUpdateUserActiveDTO>,
+    res: Response,
+    next: NextFunction
+  ): Promise<void> => {
+    try {
+      const usuario = await userService.setUserActive(req.params.id, req.body.activo);
+      res.status(200).json({ success: true, data: usuario });
+    } catch (error) {
+      next(error);
+    }
   };
 }
