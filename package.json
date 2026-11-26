@@ -4,14 +4,19 @@
   "description": "",
   "main": "dist/server.js",
   "scripts": {
-  "test": "echo \"Error: no test specified\" && exit 1",
-  "dev": "tsx watch server.ts",
-  "build": "tsc",
-  "start": "node server.ts"
-},
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "tsx watch server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js",
+    "db:validate": "prisma validate",
+    "db:generate": "prisma generate",
+    "db:pull": "prisma db pull",
+    "db:studio": "prisma studio"
+  },
   "keywords": [],
   "type": "commonjs",
   "dependencies": {
+    "@prisma/client": "^6.19.0",
     "cors": "^2.8.6",
     "dotenv": "^18.0.6",
     "express": "^5.2.1"
@@ -21,7 +26,14 @@
     "@types/express": "^5.0.6",
     "@types/node": "^26.6.5",
     "nodemon": "^3.1.14",
+    "prisma": "^6.19.0",
     "tsx": "^4.23.15",
     "typescript": "^7.0.2"
+  },
+  "allowScripts": {
+    "esbuild@0.28.2": true,
+    "@prisma/client@6.19.3": true,
+    "prisma@6.19.3": true,
+    "@prisma/engines@6.19.3": true
   }
 }
